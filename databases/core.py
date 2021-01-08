@@ -210,9 +210,12 @@ class Connection:
         self._transaction_lock = asyncio.Lock()
         self._transaction_stack = []  # type: typing.List[Transaction]
 
+        # (ab76) The query lock is used to make sure only one query is performed
+        # at a time.
         self._query_lock = asyncio.Lock()
 
     async def __aenter__(self) -> "Connection":
+        # (ab76) Make sure only the current connection has the access to the counter.
         async with self._connection_lock:
             self._connection_counter += 1
             if self._connection_counter == 1:
